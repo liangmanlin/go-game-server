@@ -1,7 +1,7 @@
 # 使用golang开发的框架
 
 > ****
-## How?
+## How to use ?
 
 - 参考 [main.go](main.go)
   
@@ -158,3 +158,4 @@
 ## Future
 
 * `db`添加缓存
+* 考虑console使用nc进行交互界面，移除http server的单向弱交互
