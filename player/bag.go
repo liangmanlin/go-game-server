@@ -11,7 +11,7 @@ import (
 const bagName = "bag"
 
 var BagLoad = func(ctx *kernel.Context, player *global.Player) {
-	rl := db.SyncSelect(ctx, "bag", player.RoleID, player.RoleID)
+	rl := db.SyncSelect(ctx, global.TABLE_BAG, player.RoleID, player.RoleID)
 	m := make(map[int32]*global.PGoods)
 	var maxID int32
 	tm := make(map[int32][]int32)
@@ -31,11 +31,11 @@ var BagPersistent = func(ctx *kernel.Context, player *global.Player) {
 		for id, v := range player.Bag.Dirty {
 			switch v.Type {
 			case global.DB_OP_ADD:
-				db.SyncInsert("bag", player.RoleID, toBag(player.Bag.Goods[id]))
+				db.SyncInsert(global.TABLE_BAG, player.RoleID, toBag(player.Bag.Goods[id]))
 			case global.DB_OP_UPDATE:
-				db.SyncUpdate("bag", player.RoleID, toBag(player.Bag.Goods[id]))
+				db.SyncUpdate(global.TABLE_BAG, player.RoleID, toBag(player.Bag.Goods[id]))
 			case global.DB_OP_DELETE:
-				db.SyncDelete("bag", player.RoleID, toBag(v.Goods))
+				db.SyncDelete(global.TABLE_BAG, player.RoleID, toBag(v.Goods))
 			}
 		}
 		player.Bag.Dirty = make(map[int32]global.GoodsDirty)

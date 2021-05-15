@@ -1,0 +1,6 @@
+[
+{"Id":101001,"Name":"野猴子","Type":1,"Level":2,"Behavior":20001,"NotReduceHP":0,"AttackSpeed":2000,"PropID":101001,"GuardRadius":15,"AttackRadius":3,"ActivityRadius":15,"Skills":[],"RefreshTime":1000,"Drops":[],"Exp":0,"Gold":0,"Radius":1,"EventList":[],"FightPower":0},
+{"Id":101002,"Name":"野蛮人","Type":1,"Level":5,"Behavior":20001,"NotReduceHP":0,"AttackSpeed":2000,"PropID":101002,"GuardRadius":15,"AttackRadius":3,"ActivityRadius":15,"Skills":[],"RefreshTime":1000,"Drops":[],"Exp":0,"Gold":0,"Radius":1,"EventList":[],"FightPower":0},
+{"Id":101003,"Name":"秃鹫","Type":1,"Level":14,"Behavior":20001,"NotReduceHP":0,"AttackSpeed":2000,"PropID":101003,"GuardRadius":15,"AttackRadius":3,"ActivityRadius":15,"Skills":[],"RefreshTime":1000,"Drops":[],"Exp":0,"Gold":0,"Radius":1,"EventList":[],"FightPower":0},
+{"Id":101004,"Name":"老虎","Type":1,"Level":1,"Behavior":20001,"NotReduceHP":0,"AttackSpeed":2000,"PropID":101004,"GuardRadius":5,"AttackRadius":3,"ActivityRadius":15,"Skills":[],"RefreshTime":1000,"Drops":[],"Exp":0,"Gold":0,"Radius":1,"EventList":[],"FightPower":0}
+]

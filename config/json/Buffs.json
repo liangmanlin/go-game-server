@@ -1,0 +1,11 @@
+[
+{"Id":1,"BuffType":1,"BuffLV":1,"BuffValue":3000,"LastTime":500,"EffectType":0,"EffectFun":"","SumType":3,"InvType":1,"Inv":0,"OpFun":"","IsFight":1,"IsDebuff":0,"NoticeType":0,"ChangeMapDel":0,"AvoidList":[],"CleanList":[],"NoMmove":0,"NoSkill":0},
+{"Id":2,"BuffType":2,"BuffLV":1,"BuffValue":3000,"LastTime":5000,"EffectType":0,"EffectFun":"","SumType":0,"InvType":1,"Inv":0,"OpFun":"","IsFight":1,"IsDebuff":0,"NoticeType":1,"ChangeMapDel":0,"AvoidList":[],"CleanList":[],"NoMmove":0,"NoSkill":0},
+{"Id":3,"BuffType":3,"BuffLV":1,"BuffValue":100,"LastTime":3600000,"EffectType":1,"EffectFun":"add_attack","SumType":1,"InvType":1,"Inv":0,"OpFun":"","IsFight":0,"IsDebuff":0,"NoticeType":0,"ChangeMapDel":0,"AvoidList":[],"CleanList":[],"NoMmove":0,"NoSkill":0},
+{"Id":4,"BuffType":4,"BuffLV":1,"BuffValue":-4000,"LastTime":2000,"EffectType":1,"EffectFun":"move_speed_rate","SumType":4,"InvType":1,"Inv":0,"OpFun":"","IsFight":1,"IsDebuff":1,"NoticeType":1,"ChangeMapDel":0,"AvoidList":[],"CleanList":[],"NoMmove":0,"NoSkill":0},
+{"Id":5,"BuffType":5,"BuffLV":1,"BuffValue":5000,"LastTime":10000,"EffectType":1,"EffectFun":"move_speed_rate","SumType":4,"InvType":1,"Inv":0,"OpFun":"","IsFight":1,"IsDebuff":0,"NoticeType":0,"ChangeMapDel":0,"AvoidList":[],"CleanList":[],"NoMmove":0,"NoSkill":0},
+{"Id":6,"BuffType":6,"BuffLV":1,"BuffValue":0,"LastTime":1000,"EffectType":0,"EffectFun":"","SumType":5,"InvType":1,"Inv":0,"OpFun":"","IsFight":1,"IsDebuff":1,"NoticeType":1,"ChangeMapDel":0,"AvoidList":[8],"CleanList":[],"NoMmove":1,"NoSkill":1},
+{"Id":7,"BuffType":7,"BuffLV":1,"BuffValue":1000,"LastTime":5000,"EffectType":1,"EffectFun":"add_attack_rate","SumType":4,"InvType":1,"Inv":0,"OpFun":"","IsFight":1,"IsDebuff":0,"NoticeType":1,"ChangeMapDel":0,"AvoidList":[],"CleanList":[],"NoMmove":0,"NoSkill":0},
+{"Id":8,"BuffType":7,"BuffLV":1,"BuffValue":1000,"LastTime":7000,"EffectType":1,"EffectFun":"add_attack_rate","SumType":4,"InvType":1,"Inv":0,"OpFun":"","IsFight":1,"IsDebuff":0,"NoticeType":1,"ChangeMapDel":0,"AvoidList":[],"CleanList":[],"NoMmove":0,"NoSkill":0},
+{"Id":9,"BuffType":8,"BuffLV":1,"BuffValue":0,"LastTime":1000,"EffectType":0,"EffectFun":"","SumType":3,"InvType":1,"Inv":0,"OpFun":"","IsFight":1,"IsDebuff":0,"NoticeType":0,"ChangeMapDel":0,"AvoidList":[],"CleanList":[],"NoMmove":0,"NoSkill":0}
+]

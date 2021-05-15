@@ -2,7 +2,6 @@ package gw
 
 import (
 	"game/global"
-	"game/player"
 	"github.com/liangmanlin/gootp/gate"
 	"github.com/liangmanlin/gootp/gate/pb"
 	"github.com/liangmanlin/gootp/kernel"
@@ -10,7 +9,7 @@ import (
 )
 
 var TcpClientActor = &kernel.Actor{
-	Init: func(ctx *kernel.Context,pid *kernel.Pid, args ...interface{}) unsafe.Pointer {
+	Init: func(ctx *kernel.Context, pid *kernel.Pid, args ...interface{}) unsafe.Pointer {
 		t := global.TcpClientState{}
 		t.Coder = args[0].(*pb.Coder)
 		t.Conn = args[1].(*gate.Conn)
@@ -23,18 +22,27 @@ var TcpClientActor = &kernel.Actor{
 		case bool:
 			doLogin(t, context)
 		case []byte:
-			if t.Conn == nil {
-				return
-			}
-			err := t.Conn.SendBufHead(m)
-			if err != nil {
-				t.Conn.Close()
-				t.Conn = nil
-			}
+			sendBuf(t,m)
 		case *gate.TcpError:
 			context.Exit("normal")
 		case int:
 			context.Exit("normal")
+		case *global.TcpReConnectGW:
+			doReConnect(t,context,m)
+		case gate.Pack:
+			switch proto := m.Proto.(type) {
+			case *global.LoginTosLogin:
+				doLoginLogin(t,context,proto)
+			case *global.LoginTosSelect:
+				doLoginSelect(t,context,proto)
+			case *global.LoginTosCreateRole:
+				doLoginCreate(t,context,proto)
+			default:
+				// 只有极少数情况会走到这里
+				if t.Player != nil {
+					context.Cast(t.Player,m)
+				}
+			}
 		default:
 			kernel.ErrorLog("un handle msg: %#v", m)
 		}
@@ -56,18 +64,52 @@ var TcpClientActor = &kernel.Actor{
 
 func doLogin(t *global.TcpClientState, context *kernel.Context) {
 	t.Conn.SetHead(2)
-	//err,buf := t.Conn.Recv(0,5000)
-	//if err != nil {
-	//	kernel.ErrorLog(err.Error())
-	//	t.Conn.Close()
-	//	context.Exit("normal")
-	//	return
-	//}
-	//id,proto := pb.GetCoder(1).Decode(buf)
-	//kernel.ErrorLog("%d,%#v",id,proto)
+	err, buf := t.Conn.Recv(0, 5)
+	if err != nil {
+		kernel.ErrorLog("handshake error %s", err.Error())
+		context.Exit(kernel.ExitReasonNormal)
+		return
+	}
+	_, proto := pb.GetCoder(1).Decode(buf)
+	pt := proto.(*global.LoginTosConnect)
+	if !pt.IsReconnect {
+		token := RandomToken() // 生成一个唯一key,作为重连的标志
+		InsertToken(token, context.Self())
+		rs := &global.LoginTocConnect{Succ: true, IsReconnect: false, Token: token}
+		if t.Conn.SendBufHead(t.Coder.Encode(rs, 2)) != nil {
+			context.Exit(kernel.ExitReasonNormal)
+			return
+		}
+		// 异步接收
+		t.Conn.StartReaderDecode(context.Self(),pb.GetCoder(1).Decode)
+	}else{
+		pid := TokenToPid(pt.Token)
+		if pid != nil {
+			// 重连，转移到目标进程
+			context.Cast(pid,&global.TcpReConnectGW{Conn: t.Conn,RecID: pt.RecID,Token: pt.Token})
+			rs := &global.LoginTocConnect{Succ: true, IsReconnect: true, Token: pt.Token}
+			_ = t.Conn.SendBufHead(t.Coder.Encode(rs, 2))
+			t.Conn = nil
+		}else{
+			rs := &global.LoginTocConnect{Succ: false, IsReconnect: true, Token: ""}
+			_ = t.Conn.SendBufHead(t.Coder.Encode(rs, 2))
+		}
+		context.Exit(kernel.ExitReasonNormal)
+	}
+}
 
-	// 该进程只负责发送网络数据
-	// 玩家进程负责收
-	var roleID int64 = 1
-	kernel.Start(player.Actor, t.Conn, context.Self(),roleID)
+func SendPack(state *global.TcpClientState,pack interface{})  {
+	buf := state.Coder.Encode(pack,2)
+	sendBuf(state,buf)
+}
+
+func sendBuf(state *global.TcpClientState,buf []byte)  {
+	state.SendID++
+	state.Cache[state.SendID % CacheSize] = buf
+	if state.Conn != nil {
+		if state.Conn.SendBufHead(buf) != nil {
+			state.Conn.Close()
+			state.Conn = nil
+		}
+	}
 }

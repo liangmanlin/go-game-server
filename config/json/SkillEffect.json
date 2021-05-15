@@ -1,0 +1,5 @@
+[
+{"Id":1001,"Type":1,"Func":"add_self_buff","Arg":[1,2000,1]},
+{"Id":1002,"Type":1,"Func":"add_target_buff","Arg":[1,2000,1]},
+{"Id":2001,"Type":2,"Func":"common_attack","Arg":[100,100,0]}
+]

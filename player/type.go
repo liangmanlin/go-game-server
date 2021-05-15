@@ -15,3 +15,5 @@ type TResult struct {
 	OK     bool
 	Result interface{}
 }
+
+type MsgHandler func(ctx *kernel.Context, player *global.Player,msg interface{})

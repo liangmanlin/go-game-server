@@ -4,8 +4,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
-github.com/liangmanlin/gootp v0.0.0-20210412140116-7401be02ad85 h1:woIu15DvZ22ksNUlp53ZVj8L1UAANy8ftdihyF5osjs=
-github.com/liangmanlin/gootp v0.0.0-20210412140116-7401be02ad85/go.mod h1:A2JWgEU3gpIQ/nKLcdIQ1PLytMWfeH3Irc39XpZ3PIg=
+github.com/liangmanlin/gootp v0.0.0-20210515150715-95f0bfc5bceb h1:Ka1caBHLmlGG/a871iI01uJDEnWlhofa+DegLiI33A8=
+github.com/liangmanlin/gootp v0.0.0-20210515150715-95f0bfc5bceb/go.mod h1:A2JWgEU3gpIQ/nKLcdIQ1PLytMWfeH3Irc39XpZ3PIg=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9M+97sNutRR1RKhG96O6jWumTTnw=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

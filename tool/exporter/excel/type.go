@@ -3,6 +3,7 @@ package excel
 type Excel struct {
 	Name    string
 	Header  []*Head
+	Commits []string
 	AllData [][]string
 }
 

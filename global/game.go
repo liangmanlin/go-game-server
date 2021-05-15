@@ -5,27 +5,33 @@ import (
 	"github.com/liangmanlin/gootp/kernel"
 	"github.com/liangmanlin/gootp/rand"
 	"github.com/liangmanlin/gootp/timer"
+	"unsafe"
 )
 
 type Player struct {
-	RoleID         int64
-	Conn           *gate.Conn
-	GWPid          *kernel.Pid
-	DirtyMod       map[string]bool
+	RoleID   int64
+	Conn     *gate.Conn
+	GWPid    *kernel.Pid
+	MapPid   *kernel.Pid
+	DirtyMod map[string]bool
 	Transaction
 	BagMaxID       int32
 	Bag            *BagData
 	Attr           *PRoleAttr
 	Timer          *timer.Timer
 	PersistentTime int64
-	Rand			*rand.Rand
+	Rand           *rand.Rand
+	PropData       unsafe.Pointer // 规避循环引用
+	Prop           *PProp
+	Map            *RoleMap
+	HeartTime      int64
 }
 
 type Transaction struct {
-	IsTransaction  bool
-	BackupMap      map[BackupKey]int
-	Backup         []BackData
-	DBQueue        []DBQueue
+	IsTransaction bool
+	BackupMap     map[BackupKey]int
+	Backup        []BackData
+	DBQueue       []DBQueue
 }
 
 type BagData struct {
@@ -64,4 +70,62 @@ type KV struct {
 }
 
 type Loop struct {
+}
+
+type CreateRole struct {
+	AgentID  int32
+	ServerID int32
+	Account  string
+	Name     string
+	HeroType int32
+	Sex      int32
+}
+
+type CreateRoleResult struct {
+	RoleID int64
+	Roles  []int64
+}
+
+type TcpReConnect struct {
+}
+
+type TcpReConnectGW struct {
+	Conn  *gate.Conn
+	RecID int64
+	Token string
+}
+
+type Kick struct {
+}
+
+type OK struct {
+}
+
+type RoleDeadArg struct {
+	SrcID   int64
+	SrcType int8
+}
+
+type RoleUpdateProps struct {
+	RoleID     int64
+	FightPower int64
+	UP         []*PKV
+}
+
+type RoleExitMap struct {
+	RoleID int64
+}
+
+type MapRoleExit struct {
+	ExitReturn bool
+	X          float32
+	Y          float32
+}
+
+type MapRoleEnter struct {
+	Pid     *kernel.Pid
+	MapID   int32
+	MapName string
+	X       float32
+	Y       float32
 }

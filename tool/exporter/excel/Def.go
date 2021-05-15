@@ -9,9 +9,11 @@ const (
 
 const (
 	FTypeInt FType = iota
+	FTypeFloat
 	FTypeString
 	FTypeKey
 	FTypeTerm
+	FTypeSlice
 )
 
 var ruleMap = map[int]Rule{

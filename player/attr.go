@@ -14,19 +14,13 @@ const (
 )
 
 var AttrLoad = func(ctx *kernel.Context, player *global.Player) {
-	attr := db.SyncSelectRow(ctx, "role_attr", player.RoleID, player.RoleID)
-	if attr == nil {
-		player.Attr = &global.PRoleAttr{RoleID: player.RoleID}
-		a := *player.Attr
-		db.SyncInsert("role_attr",player.RoleID,&a)
-	}else{
-		player.Attr = attr.(*global.PRoleAttr)
-	}
+	attr := db.SyncSelectRow(ctx, global.TABLE_ROLE_ATTR, player.RoleID, player.RoleID)
+	player.Attr = attr.(*global.PRoleAttr)
 }
 
 var AttrPersistent = func(ctx *kernel.Context, player *global.Player) {
 	a := *player.Attr // 没有二层数据，可以直接拷贝，比起使用反射，效率极高
-	db.SyncUpdate("role_attr", player.RoleID, &a)
+	db.SyncUpdate(global.TABLE_ROLE_ATTR, player.RoleID, &a)
 }
 
 var AttrReduceDiamond = func(player *global.Player, reduce int32) {

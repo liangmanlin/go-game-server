@@ -1,0 +1,14 @@
+[
+{"Id":10001,"Type":1,"Func":"fight","Arg":[],"Child":[]},
+{"Id":10002,"Type":2,"Func":"searchEnemyNeighbor","Arg":[1,0],"Child":[10001]},
+{"Id":10003,"Type":4,"Func":"","Arg":[],"Child":[10002,20002]},
+{"Id":10004,"Type":1,"Func":"fight","Arg":[],"Child":[]},
+{"Id":10005,"Type":2,"Func":"searchEnemyInmap","Arg":[1,0],"Child":[10001]},
+{"Id":20001,"Type":3,"Func":"patrol","Arg":[10000],"Child":[]},
+{"Id":20002,"Type":3,"Func":"patrol2","Arg":[10000],"Child":[]},
+{"Id":20003,"Type":3,"Func":"patrol","Arg":[10000],"Child":[10004]},
+{"Id":20004,"Type":1,"Func":"none","Arg":[],"Child":[]},
+{"Id":20005,"Type":3,"Func":"none","Arg":[],"Child":[20004]},
+{"Id":20006,"Type":1,"Func":"random_move","Arg":[],"Child":[]},
+{"Id":20007,"Type":3,"Func":"patrol","Arg":[5000],"Child":[20006]}
+]

@@ -1,8 +1,8 @@
 package excel
 
 import (
-	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
+	"fmt"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -24,6 +24,8 @@ func LoadFile(fileName string) *Excel {
 		return nil
 	}
 	heads := readHead(file, sheetName, rows)
+	// 读取注释
+	commits := readCommit(file,sheetName,rows,heads)
 	var all [][]string
 	// 读取数据
 	for i := 4; i < len(rows); i++ {
@@ -39,7 +41,7 @@ func LoadFile(fileName string) *Excel {
 			}
 			val := row[head.Index]
 			switch head.Type {
-			case FTypeInt:
+			case FTypeInt,FTypeFloat:
 				if val == "" {val = "0"}
 			case FTypeString:
 				val = CheckValString(val)
@@ -51,7 +53,7 @@ func LoadFile(fileName string) *Excel {
 	fileName = filepath.Base(fileName)
 	ext := filepath.Ext(fileName)
 	fileName = strings.TrimSuffix(fileName, ext)
-	excel := &Excel{Name: fileName, Header: heads, AllData: all}
+	excel := &Excel{Name: fileName, Header: heads,Commits: commits, AllData: all}
 	return excel
 }
 
@@ -78,6 +80,15 @@ func readHead(file *excelize.File, sheetName string, rows [][]string) []*Head {
 	return heads
 }
 
+func readCommit(file *excelize.File, sheetName string, rows [][]string,heads []*Head) []string {
+	row := rows[3]
+	var commits []string
+	for _,h := range heads{
+		commits = append(commits,row[h.Index])
+	}
+	return commits
+}
+
 func isColSkip(rule Rule, val string) bool {
 	return rule == RuleNone || val == ""
 }
@@ -102,6 +113,8 @@ func getHType(TypeName string) FType {
 	switch TypeName {
 	case "int":
 		return FTypeInt
+	case "float32":
+		return FTypeFloat
 	case "string":
 		return FTypeString
 	case "key":

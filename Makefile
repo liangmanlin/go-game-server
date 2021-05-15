@@ -1,10 +1,18 @@
 SHELL := /bin/bash
 # print-% : ;@echo $* = $($*)
-.PHONY: all dialyzer clean
+.PHONY: all release dialyzer clean
 MAKEFLAGS+= --no-print-director
 SERVER_ROOT := .
 ifndef OUT_DIR
 	OUT_DIR := $(SERVER_ROOT)/bin
+endif
+
+ifndef DEBUG
+    DEBUG := debug
+endif
+
+ifndef LG
+    LG := cn
 endif
 
 NOTMain := $(wildcard tool/*/*.go)
@@ -32,10 +40,13 @@ $(SERVER_ROOT)/proto/pb_auto.go: $(SERVER_ROOT)/global/pb_def.go $(PROTO_TOOL)
 	@($(PROTO_TOOL) -f $< -o $(SERVER_ROOT)/proto)
 
 $(OUT_DIR)/main: $(SOURCES)
-	go build -o $@ main.go
+	go build -tags "$(DEBUG) $(LG)" -o $@ main.go
 
 $(OUT_DIR)/%.so: %.go
-	go build -buildmode=plugin -o $@ $<
+	go build -tags "$(DEBUG) $(LG)" -buildmode=plugin -o $@ $<
+
+release: clean
+	$(MAKE) DEBUG=release LG=$(LG)
 
 mk_dir:
 	@(mkdir -p $(OUT_DIR))

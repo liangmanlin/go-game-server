@@ -1,8 +1,8 @@
 package toGo
 
 import (
-	"game/tool/exporter/excel"
 	"fmt"
+	"game/tool/exporter/excel"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -11,24 +11,24 @@ import (
 )
 
 var reg = regexp.MustCompile(`[ \t\n\r]`)
-var regChild = regexp.MustCompile(`\[\]\*?(\w+)|\*?(\w+$)|map\[\w+\]\*?(\w+)`)
-var regField = regexp.MustCompile(`(\w+)[ \t]+(int|string|\[]\*?\w+|map\[.*]\*?\w+|\*\w+)`)
+var regChild = regexp.MustCompile(`\[\]\*?([\[\]\w]+)|\*?(\w+$)|map\[\w+\]\*?(\w+)`)
+var regField = regexp.MustCompile(`(\w+)[ \t]+(int|string|float32|\[]\*?\w+|map\[.*]\*?\w+|\*\w+)`)
 
 var defStr string
 
 func Export(exc *excel.Excel, outDir string, defFile string) {
-	file,err := os.OpenFile(defFile,os.O_RDWR,0666)
+	file, err := os.OpenFile(defFile, os.O_RDWR, 0666)
 	if err != nil {
 		panic(err)
 	}
-	buf,_ := ioutil.ReadAll(file)
+	buf, _ := ioutil.ReadAll(file)
 	file.Close()
 	defStr = string(buf)
 	// 先处理结构体数据
 	structMap := make(map[string]*excel.Child)
 	var typeDef []string
-	var keyType,keyName string
-	for _, head := range exc.Header {
+	var keyType, keyName string
+	for idx, head := range exc.Header {
 		if head.Rule == excel.RuleCommon || head.Rule == excel.RuleServer {
 			if keyName == "" {
 				keyName = head.Name
@@ -38,13 +38,16 @@ func Export(exc *excel.Excel, outDir string, defFile string) {
 				head.Child = c
 			}
 			tn := head.TypeName
-			if head.Type == excel.FTypeKey{
+			if head.Type == excel.FTypeKey {
 				tn = "string"
 			} else if head.Type == excel.FTypeInt {
 				tn = "int32"
+			} else if tn == "[]int" {
+				tn += "32"
 			}
-			typeDef = append(typeDef, fmt.Sprintf("\t%s %s", excel.FirstUP(head.Name), tn))
-			if keyType == ""{
+			commit := reg.ReplaceAllString(exc.Commits[idx], " ")
+			typeDef = append(typeDef, fmt.Sprintf("\t%s %s // %s", excel.FirstUP(head.Name), tn, commit))
+			if keyType == "" {
 				keyType = head.TypeName
 				if head.Type == excel.FTypeInt {
 					keyType = "int32"
@@ -63,9 +66,9 @@ func Export(exc *excel.Excel, outDir string, defFile string) {
 			if head.Rule != excel.RuleServer && head.Rule != excel.RuleCommon {
 				continue
 			}
-			if head.Type == excel.FTypeKey{
+			if head.Type == excel.FTypeKey {
 				val = excel.CheckValString(val)
-			}else if head.Child != nil {
+			} else if head.Child != nil {
 				// 需要展开这个数据
 				val = explainChild(val, head.Child)
 			}
@@ -79,12 +82,12 @@ func Export(exc *excel.Excel, outDir string, defFile string) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("导出配置文件：%s.json\n",name)
+	fmt.Printf("导出配置文件：%s.json\n", name)
 	defer file2.Close()
 	file2.WriteString(jsonStr)
-	var getCode,loadCode,keyType2 string
+	var getCode, loadCode, keyType2 string
 	keyType2 = keyType
-	if keyType == "key"{
+	if keyType == "key" {
 		keyType2 = "string"
 	}
 	configName := firstDown(name)
@@ -95,29 +98,29 @@ func Export(exc *excel.Excel, outDir string, defFile string) {
 		c.m[c.arr[i].%s] = i
 	}
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&%s)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
-}`,name[0:1],configName,configName,keyType2,name,keyName,name)
-	if keyType != "key"{
-		getCode = fmt.Sprintf("type %sConfig struct{\n" +
-			"\tm map[%s]int\n" +
+}`, name[0:1], configName, configName, keyType2, name, keyName, name)
+	if keyType != "key" {
+		getCode = fmt.Sprintf("type %sConfig struct{\n"+
+			"\tm map[%s]int\n"+
 			"\tarr []Def%s\n"+
 			"}\n"+
-			"var %s = &%sConfig{}\n" +
-			"func (%s %sConfig)Get(key %s)*Def%s{\n" +
-			"\treturn &%s.arr[%s.m[key]]\n}\n%s\n",configName,keyType,name,name,configName,name[0:1],configName,keyType,name,name[0:1],name[0:1],loadCode)
-	}else{
-		getCode = fmt.Sprintf("type %sConfig struct{\n" +
-			"\tm map[string]int\n" +
+			"var %s = &%sConfig{}\n"+
+			"func (%s %sConfig)Get(key %s)*Def%s{\n"+
+			"\treturn &%s.arr[%s.m[key]]\n}\n%s\n", configName, keyType, name, name, configName, name[0:1], configName, keyType, name, name[0:1], name[0:1], loadCode)
+	} else {
+		getCode = fmt.Sprintf("type %sConfig struct{\n"+
+			"\tm map[string]int\n"+
 			"\tarr []Def%s\n"+
 			"}\n"+
-			"var %s = &%sConfig{}\n" +
-			"func (%s %sConfig)Get(key...interface{})*Def%s{\n" +
-			"\treturn &%s.arr[%s.m[sliceToString(key)]]\n}\n%s\n",configName,name,name,configName,name[0:1],configName,name,name[0:1],name[0:1],loadCode)
+			"var %s = &%sConfig{}\n"+
+			"func (%s %sConfig)Get(key...interface{})*Def%s{\n"+
+			"\treturn &%s.arr[%s.m[sliceToString(key)]]\n}\n%s\n", configName, name, name, configName, name[0:1], configName, name, name[0:1], name[0:1], loadCode)
 	}
-	getCode+= fmt.Sprintf(`func (%s %sConfig)All()[]Def%s {
+	getCode += fmt.Sprintf(`func (%s %sConfig)All()[]Def%s {
 	return %s.arr
-}`,name[0:1],configName,name,name[0:1])
+}`, name[0:1], configName, name, name[0:1])
 	def := fmt.Sprintf("//%s-start\ntype Def%s struct {\n%s\n}\n%s\n//%s-end",
-		name, name, strings.Join(typeDef, "\n"),getCode,name)
+		name, name, strings.Join(typeDef, "\n"), getCode, name)
 	// 替换定义文件
 	if strings.Index(defStr, fmt.Sprintf("//%s-start", name)) >= 0 {
 		defReg := regexp.MustCompile(fmt.Sprintf("//%s-start[\\s\\S]*//%s-end", name, name))
@@ -126,9 +129,9 @@ func Export(exc *excel.Excel, outDir string, defFile string) {
 		defStr += def + "\n"
 	}
 	if strings.Index(defStr, fmt.Sprintf("PtrMap[\"%s\"]", name)) < 0 {
-		defStr = strings.Replace(defStr,"//init-ptr-start","//init-ptr-start\n\t"+fmt.Sprintf("PtrMap[\"%s\"] = %s", name,name),1)
+		defStr = strings.Replace(defStr, "//init-ptr-start", "//init-ptr-start\n\t"+fmt.Sprintf("PtrMap[\"%s\"] = %s", name, name), 1)
 	}
-	file,_ = os.OpenFile(defFile,os.O_RDWR|os.O_TRUNC,0666)
+	file, _ = os.OpenFile(defFile, os.O_RDWR|os.O_TRUNC, 0666)
 	file.WriteString(defStr)
 }
 
@@ -150,7 +153,33 @@ func transSlice(val string, child *excel.Child) string {
 	if lens == 0 {
 		return "[]"
 	}
-	if child.Value != excel.FTypeTerm {
+	if child.Value == excel.FTypeSlice {
+		var start,i int
+		var buf []byte
+		lens = len(val)
+		count := 0
+		for i < lens {
+			b := val[i]
+			i++
+			if b == '{' && count == 0 {
+				buf = append(buf, '[')
+				count++
+			} else if b == '{' {
+				start = i-1
+				count++
+			} else if b == '}' && count > 1 {
+				s := transSlice(val[start:i],child.Fields[0].Child)
+				buf = append(buf, s...)
+				count--
+			} else if b == '}' {
+				buf = append(buf, ']')
+				break
+			} else if b == ',' && count == 1 {
+				buf = append(buf, b)
+			}
+		}
+		return string(buf)
+	} else if child.Value != excel.FTypeTerm {
 		return "[" + val[1:lens-1] + "]"
 	}
 	// 原则上不允许嵌套，所以这里一定是struct
@@ -200,7 +229,7 @@ func transMap(val string, child *excel.Child) string {
 		i++
 		if b == '{' && count == 0 {
 			buf = append(buf, b)
-			if valBuf[i]!= '}' && valBuf[i] != '"'{
+			if valBuf[i] != '}' && valBuf[i] != '"' {
 				buf = append(buf, '"')
 			}
 			count++
@@ -215,14 +244,14 @@ func transMap(val string, child *excel.Child) string {
 			break
 		} else if b == ',' && count > 1 {
 			buf, i, idx = transField(buf, i, child, b, valBuf, idx)
-		}else if b == ','{
+		} else if b == ',' {
 			buf = append(buf, b)
-			if valBuf[i] != '"'{
+			if valBuf[i] != '"' {
 				buf = append(buf, '"')
 			}
-		} else if b == ':'{
+		} else if b == ':' {
 			l := len(buf)
-			if l > 0 && buf[l-1] != '"'{
+			if l > 0 && buf[l-1] != '"' {
 				buf = append(buf, '"')
 			}
 			buf = append(buf, b)
@@ -327,9 +356,20 @@ func readChild(typeName string, structMap map[string]*excel.Child) *excel.Child 
 }
 
 func readFields(cv string, structMap map[string]*excel.Child, child *excel.Child) {
-	if cv == "int" || cv == "string" {
+	if cv == "int" || cv == "float32" || cv == "string" {
 		child.Value = excel.FTypeInt // 映射为基础类型就可以了
 	} else {
+		if strings.HasPrefix(cv, "[]") {
+			s := cv[2:]
+			child.Value = excel.FTypeSlice
+			child2 := &excel.Child{Type: excel.HeadChildTypeSlice, Value: excel.FTypeTerm}
+			if !(s == "int" || s == "string" || s == "float32" || s == "int32") {
+				child2.Value = excel.FTypeInt
+			}
+			structMap[cv] = child
+			child.Fields = []*excel.Field{{"", child2}}
+			return
+		}
 		child.Value = excel.FTypeTerm
 		// 从定义文件中继续展开
 		if c, ok := structMap[cv]; ok {
@@ -341,7 +381,7 @@ func readFields(cv string, structMap map[string]*excel.Child, child *excel.Child
 }
 
 func searchChildFromDef(structMap map[string]*excel.Child, cv string) []*excel.Field {
-	r := regexp.MustCompile(fmt.Sprintf("type[ \t]+%s[ \t]+struct[ \t\n]*{([\\[\\]*/\\w\\r\\n\\s]*)}", cv))
+	r := regexp.MustCompile(fmt.Sprintf(`type[ \t]+%s[ \t]+struct[ \t\n]*{([\[\]*/\w\r\n\s]*)}`, cv))
 	matches := r.FindStringSubmatch(defStr)
 	if len(matches) != 2 {
 		panic(fmt.Errorf("未能找到结构定义：%s", cv))
@@ -354,8 +394,11 @@ func searchChildFromDef(structMap map[string]*excel.Child, cv string) []*excel.F
 	for _, v := range sl {
 		if len(v) == 3 {
 			f := &excel.Field{Name: v[1]}
-			if v[2] != "int" && v[2] != "string" {
-				tmp[v[2]] = f // 后续处理,规避环
+			if strings.HasPrefix(v[2], "[]") {
+				s := v[2][2:]
+				if !(s == "int" || s == "string" || s == "float32" || s == "int32") {
+					tmp[v[2]] = f // 后续处理,规避环
+				}
 			}
 			fields = append(fields, f)
 		}
@@ -367,10 +410,10 @@ func searchChildFromDef(structMap map[string]*excel.Child, cv string) []*excel.F
 	return fields
 }
 
-func firstDown(name string)string {
+func firstDown(name string) string {
 	b := name[0]
 	if b >= 'a' && b <= 'z' {
 		return name
 	}
-	return string(b+('a'-'A'))+name[1:]
+	return string(b+('a'-'A')) + name[1:]
 }

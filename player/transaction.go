@@ -24,10 +24,10 @@ func Transaction(player *global.Player, f func() interface{}) (rs TResult) {
 	rs.Result = f()
 	rs.OK = true
 	commit(player)
-	return rs
+	return
 }
 
-var Backup = func(player *global.Player, backupKey global.BackupKey, key, value interface{}) {
+func Backup(player *global.Player, backupKey global.BackupKey, key, value interface{}) {
 	if _, ok := player.BackupMap[backupKey]; !ok {
 		data := global.BackData{Key: key, Value: value}
 		player.Backup = append(player.Backup, data)
@@ -35,11 +35,11 @@ var Backup = func(player *global.Player, backupKey global.BackupKey, key, value 
 	}
 }
 
-var Abort = func(m interface{}) {
+func Abort(m interface{}) {
 	panic(m)
 }
 
-var AddDBQueue = func(player *global.Player, fun func(player *global.Player,op int32,arg interface{}), op int32, arg interface{}) {
+func AddDBQueue(player *global.Player, fun func(player *global.Player,op int32,arg interface{}), op int32, arg interface{}) {
 	player.DBQueue = append(player.DBQueue, global.DBQueue{OP: op, Fun: fun, Arg: arg})
 }
 

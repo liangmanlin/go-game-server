@@ -20,5 +20,17 @@ const (
 	BACKUP_ATTR
 )
 
+const ROLEID_AGENT int64 = 1000000000000
+const ROLEID_SERVER int64 = 1000000
 
+const (
+	SYS_ACCOUNT_SERVER = "sys_account_server"
+)
 
+const (
+	ACTOR_ROLE int8 = iota + 1
+	ACTOR_MONSTER
+	C_ACTOR_SIZE // 这个一动要在最后
+)
+
+const CHECK_NODE_PROTO = true
