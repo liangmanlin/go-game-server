@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"game/config"
 	"game/global"
 	"github.com/liangmanlin/gootp/kernel"
 	"github.com/liangmanlin/gootp/node"
@@ -66,6 +67,10 @@ func GetServerRoot() string {
 	return _serverRoot
 }
 
+func GetServerID() int32 {
+	return int32(config.Server.GetListInt("server_id",0))
+}
+
 func NormalMapName(mapID int32) string {
 	return "normal_" + strconv.FormatInt(int64(mapID), 10)
 }
@@ -80,7 +85,7 @@ func UnRegisterMap(name string) {
 }
 
 func GetMapPid(name string) *kernel.Pid {
-	if pid,ok := mapNamePid.Load(name);ok{
+	if pid, ok := mapNamePid.Load(name); ok {
 		return pid.(*kernel.Pid)
 	}
 	return nil
@@ -105,7 +110,7 @@ func CalcDir(pos1, pos2 *global.PPos) int32 {
 	return dir
 }
 
-func Dir(dx,dy float64) int16 {
+func Dir(dx, dy float64) int16 {
 	r := math.Atan2(dy, dx)
 	dir := int16(math.Round(r * 180 / math.Pi))
 	if dir < 0 {
@@ -117,7 +122,6 @@ func Dir(dx,dy float64) int16 {
 func DirToTan(dir int32) float64 {
 	return float64(dir) / 180 * math.Pi
 }
-
 
 // TODO 使用unsafe会更快
 func ToProp(from interface{}) *global.PProp {
@@ -198,39 +202,31 @@ func mapToString(rf reflect.Value) string {
 	return "{" + strings.Join(sl, ",") + "}"
 }
 
-func NewPMsg(msgID int32) *global.PMsg {
-	return &global.PMsg{MsgID: msgID}
-}
-
-func NewPMsgParam(msgID int32, param ...interface{}) *global.PMsg {
-	return &global.PMsg{MsgID: msgID}
-}
-
-func CastMap(mapPid *kernel.Pid,mod int32,msg interface{})  {
+func CastMap(mapPid *kernel.Pid, mod int32, msg interface{}) {
 	// 用于检测消息是否注册,正式环境不检查
 	if global.DEBUG && global.CHECK_NODE_PROTO {
 		rType := reflect.TypeOf(msg)
-		if ! node.IsProtoDef(rType){
-			kernel.ErrorLog("node proto %s not defined",rType.Name())
+		if !node.IsProtoDef(rType) {
+			kernel.ErrorLog("node proto %s not defined", rType.Name())
 			return
 		}
 	}
 	if mapPid != nil {
-		kernel.Cast(mapPid,&kernel.KMsg{ModID: mod,Msg: msg})
+		kernel.Cast(mapPid, &kernel.KMsg{ModID: mod, Msg: msg})
 	}
 }
 
 // 代码一样的
-func CastPlayer(playerPid *kernel.Pid,mod int32,msg interface{})  {
+func CastPlayer(playerPid *kernel.Pid, mod int32, msg interface{}) {
 	// 用于检测消息是否注册,正式环境不检查
 	if global.DEBUG && global.CHECK_NODE_PROTO {
 		rType := reflect.TypeOf(msg)
-		if ! node.IsProtoDef(rType){
-			kernel.ErrorLog("node proto %s not defined",rType.Name())
+		if !node.IsProtoDef(rType) {
+			kernel.ErrorLog("node proto %s not defined", rType.Name())
 			return
 		}
 	}
-	kernel.Cast(playerPid,&kernel.KMsg{ModID: mod,Msg: msg})
+	kernel.Cast(playerPid, &kernel.KMsg{ModID: mod, Msg: msg})
 }
 
 func init() {

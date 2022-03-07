@@ -21,12 +21,12 @@ func BuffLoop(state *MapState, now2 int64) {
 	for _, role := range roles {
 		BuffLoopMapInfo(state, role, now2)
 	}
-	monsters := state.MapMonsters
-	for _, monster := range monsters {
-		if monster.IsAlive() {
-			BuffLoopMapInfo(state, monster, now2)
-		}
-	}
+	//monsters := state.MapMonsters
+	//for _, monster := range monsters {
+	//	if monster.IsAlive() {
+	//		BuffLoopMapInfo(state, monster, now2)
+	//	}
+	//}
 }
 
 var BuffLoopMapInfo = func(state *MapState, MI MapInfo, now2 int64) {

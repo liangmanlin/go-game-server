@@ -76,38 +76,38 @@ type configFunc interface {
 	load(path string)
 }
 
-type ServerMapType map[string]interface{}
+type serverMapType map[string]interface{}
 
-var Server ServerMapType
+var Server serverMapType
 
-func (S ServerMapType) Get(key string) interface{} {
+func (S serverMapType) Get(key string) interface{} {
 	return S[key]
 }
-func (S ServerMapType) GetListStr(key string, idx int) string {
+func (S serverMapType) GetListStr(key string, idx int) string {
 	if c, ok := S[key]; ok {
 		return c.([]interface{})[idx].(string)
 	}
 	return ""
 }
-func (S ServerMapType) GetListInt(key string, idx int) int {
+func (S serverMapType) GetListInt(key string, idx int) int {
 	if c, ok := S[key]; ok {
 		return int(c.([]interface{})[idx].(float64))
 	}
 	return 0
 }
-func (S ServerMapType) GetStr(key string) string {
+func (S serverMapType) GetStr(key string) string {
 	if c, ok := S[key]; ok {
 		return c.(string)
 	}
 	return ""
 }
-func (S ServerMapType) GetInt(key string) int {
+func (S serverMapType) GetInt(key string) int {
 	if c, ok := S[key]; ok {
 		return int(c.(float64))
 	}
 	return 0
 }
-func (S ServerMapType) load(path string) {
+func (S serverMapType) load(path string) {
 	s := make(map[string]interface{})
 	if err := json.Unmarshal(readFile("Server", path), &s); err != nil {
 		panic(err)

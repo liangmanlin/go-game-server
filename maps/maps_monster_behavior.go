@@ -47,9 +47,11 @@ func NewDoing() *Doing {
 func DelDoing(mState *MState) {
 	size := len(mState.Doings)
 	if size > 0 {
-		doing := mState.Doings[size-1]
+		size --
+		doing := mState.Doings[size]
+		mState.Doings[size] = nil // gc
 		_doingPool.Put(doing)
-		mState.Doings = mState.Doings[0 : size-1]
+		mState.Doings = mState.Doings[0 : size]
 	}
 }
 

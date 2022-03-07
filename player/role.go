@@ -9,7 +9,7 @@ func init() {
 	modRouter[global.PLAYER_MOD_ROLE] = &RoleHandler
 }
 
-var RoleHandler MsgHandler = func(ctx *kernel.Context, player *global.Player, msg interface{}) {
+var RoleHandler MsgHandler = func(player *global.Player, msg interface{}) {
 	switch m := msg.(type) {
 	case *global.RoleDeadArg:
 		RoleDead(player,m)

@@ -4,6 +4,7 @@ import (
 	"game/boot"
 	"game/lib"
 	"github.com/liangmanlin/gootp/kernel"
+	"strconv"
 )
 
 func (a *app) Name() string {
@@ -11,7 +12,7 @@ func (a *app) Name() string {
 }
 
 func (a *app) Start(bootType kernel.AppBootType) *kernel.Pid {
-	pid := kernel.SupStart("map_sup", nil)
+	pid := kernel.SupStart("map_sup")
 	boot.StartService(pid,[]boot.Boot{
 		{Name: "map_agent",Svr: agentSvr},
 	})
@@ -19,7 +20,9 @@ func (a *app) Start(bootType kernel.AppBootType) *kernel.Pid {
 	loadConfig(a.mapConfigPath)
 	// 启动场景
 	for mapID := range allMaps {
-		StartMap(mapID, lib.NormalMapName(mapID), ModMap["mod_common"])
+		for i:=0;i<200;i++ {
+			StartMap(mapID, lib.NormalMapName(mapID)+strconv.Itoa(i), ModMap["mod_common"])
+		}
 	}
 	kernel.ErrorLog("map started")
 	return pid

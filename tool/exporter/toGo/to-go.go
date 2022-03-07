@@ -91,7 +91,7 @@ func Export(exc *excel.Excel, outDir string, defFile string) {
 		keyType2 = "string"
 	}
 	configName := firstDown(name)
-	loadCode = fmt.Sprintf(`func (%s %sConfig)load(path string)  {
+	loadCode = fmt.Sprintf(`func (%s *%sConfig)load(path string)  {
 	c := &%sConfig{m:make(map[%s]int)}
 	if err:= json.Unmarshal(readFile("%s",path), &c.arr);err != nil{panic(err)}
 	for i:=0;i<len(c.arr);i++{
@@ -105,7 +105,7 @@ func Export(exc *excel.Excel, outDir string, defFile string) {
 			"\tarr []Def%s\n"+
 			"}\n"+
 			"var %s = &%sConfig{}\n"+
-			"func (%s %sConfig)Get(key %s)*Def%s{\n"+
+			"func (%s *%sConfig)Get(key %s)*Def%s{\n"+
 			"\treturn &%s.arr[%s.m[key]]\n}\n%s\n", configName, keyType, name, name, configName, name[0:1], configName, keyType, name, name[0:1], name[0:1], loadCode)
 	} else {
 		getCode = fmt.Sprintf("type %sConfig struct{\n"+
@@ -113,10 +113,10 @@ func Export(exc *excel.Excel, outDir string, defFile string) {
 			"\tarr []Def%s\n"+
 			"}\n"+
 			"var %s = &%sConfig{}\n"+
-			"func (%s %sConfig)Get(key...interface{})*Def%s{\n"+
+			"func (%s *%sConfig)Get(key...interface{})*Def%s{\n"+
 			"\treturn &%s.arr[%s.m[sliceToString(key)]]\n}\n%s\n", configName, name, name, configName, name[0:1], configName, name, name[0:1], name[0:1], loadCode)
 	}
-	getCode += fmt.Sprintf(`func (%s %sConfig)All()[]Def%s {
+	getCode += fmt.Sprintf(`func (%s *%sConfig)All()[]Def%s {
 	return %s.arr
 }`, name[0:1], configName, name, name[0:1])
 	def := fmt.Sprintf("//%s-start\ntype Def%s struct {\n%s\n}\n%s\n//%s-end",

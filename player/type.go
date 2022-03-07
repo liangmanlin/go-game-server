@@ -2,13 +2,12 @@ package player
 
 import (
 	"game/global"
-	"github.com/liangmanlin/gootp/kernel"
 )
 
 type mod struct {
 	name       string
-	load       *func(ctx *kernel.Context, player *global.Player)
-	persistent *func(ctx *kernel.Context, player *global.Player)
+	load       *func(player *global.Player)
+	persistent *func(player *global.Player)
 }
 
 type TResult struct {
@@ -16,4 +15,4 @@ type TResult struct {
 	Result interface{}
 }
 
-type MsgHandler func(ctx *kernel.Context, player *global.Player,msg interface{})
+type MsgHandler func(player *global.Player,msg interface{})

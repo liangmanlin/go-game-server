@@ -9,15 +9,17 @@ import (
 )
 
 type Player struct {
-	RoleID   int64
-	Conn     *gate.Conn
-	GWPid    *kernel.Pid
-	MapPid   *kernel.Pid
-	DirtyMod map[string]bool
+	*kernel.Context
 	Transaction
+	RoleID         int64
+	Conn           gate.Conn
+	GWPid          *kernel.Pid
+	MapPid         *kernel.Pid
+	DirtyMod       map[string]bool
 	BagMaxID       int32
 	Bag            *BagData
 	Attr           *PRoleAttr
+	Base           *PRoleBase
 	Timer          *timer.Timer
 	PersistentTime int64
 	Rand           *rand.Rand
@@ -62,14 +64,11 @@ type BackupKey struct {
 	ID       int32
 }
 
-type HandleFunc = func(ctx *kernel.Context, player *Player, proto interface{})
+type HandleFunc = func(player *Player, proto interface{})
 
 type KV struct {
 	K int32
 	V int32
-}
-
-type Loop struct {
 }
 
 type CreateRole struct {
@@ -90,7 +89,7 @@ type TcpReConnect struct {
 }
 
 type TcpReConnectGW struct {
-	Conn  *gate.Conn
+	Conn  gate.Conn
 	RecID int64
 	Token string
 }
@@ -129,3 +128,51 @@ type MapRoleEnter struct {
 	X       float32
 	Y       float32
 }
+
+// PMsgParam start---------------------------------------------------------
+
+const (
+	param_num byte = iota + 1
+	param_string
+	param_map_id
+	param_role
+)
+
+type ParamNum int32
+
+func (p ParamNum) ToBinary() []byte {
+	return []byte{param_num, uint8(p >> 24), uint8(p >> 16), uint8(p >> 8), uint8(p)}
+}
+
+type ParamString string
+
+func (p ParamString) ToBinary() []byte {
+	size := len(p)
+	buf := make([]byte, 0, 3+size)
+	buf = append(buf, param_string, uint8(size>>8), uint8(size))
+	buf = append(buf, p...)
+	return buf
+}
+
+type ParamMapID int32
+
+func (p ParamMapID) ToBinary() []byte {
+	return []byte{param_map_id, uint8(p >> 24), uint8(p >> 16), uint8(p >> 8), uint8(p)}
+}
+
+type ParamRole struct {
+	RoleID   int64
+	RoleName string
+}
+
+func (p ParamRole) ToBinary() []byte {
+	size := len(p.RoleName)
+	buf := make([]byte, 0, 3+8+size)
+	roleID := p.RoleID
+	buf = append(buf, param_role, uint8(roleID>>56), uint8(roleID>>48), uint8(roleID>>40), uint8(roleID>>32),
+		uint8(roleID>>24), uint8(roleID>>16), uint8(roleID>>8), uint8(roleID), uint8(size>>8), uint8(size))
+	buf = append(buf, p.RoleName...)
+	return buf
+}
+
+// PMsgParam end------------------------------------------------------

@@ -9,6 +9,19 @@ import (
 
 const propSize = int32(unsafe.Sizeof(global.PProp{}) / 4)
 
+var allKeys []int32
+
+func init() {
+	allKeys = make([]int32, 0, propSize)
+	for i := int32(1); i <= propSize; i++ {
+		allKeys = append(allKeys,i)
+	}
+}
+
+func AllKeys() []int32 {
+	return allKeys
+}
+
 /*
 	属性计算模块
 */

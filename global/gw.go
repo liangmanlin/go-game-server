@@ -6,15 +6,17 @@ import (
 	"github.com/liangmanlin/gootp/kernel"
 )
 
+const CacheSize = 300
+
 type TcpClientState struct {
 	Account  string
 	AgentID  int32
 	ServerID int32
-	Conn     *gate.Conn
+	Conn     gate.Conn
 	Coder    *pb.Coder
 	Player   *kernel.Pid
 	RoleID   int64
 	SendID   int64
 	Roles    []*PRole
-	Cache    [][]byte
+	Cache    [CacheSize][]byte
 }

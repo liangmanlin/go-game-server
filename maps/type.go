@@ -56,6 +56,7 @@ type MapPos struct {
 }
 
 type MapState struct {
+	*kernel.Context
 	Config      *MapConfig
 	Mod         *MapMod
 	Name        string
@@ -66,7 +67,7 @@ type MapState struct {
 	Monsters    map[int64]*MState
 	Rand        rand.Rand
 	Timer       *timer.Timer
-	LC          int32
+	LC          int
 	Actors      map[AKey]*MapActor
 	MoveActor   map[AKey]*Move
 	AStar       *astar.AStar
@@ -137,6 +138,7 @@ type MState struct {
 	Return         *MReturn
 	Config         *config.DefMonster // 这里持有了一个配置，这样做对gc不友好，因为假如热更了配置，这里要等怪物死亡才会更新
 	Skills         []MonsterSkill
+	HPChange	   *func(state *MapState, mState *MState, srcActor *MapActor,reduce int32)
 }
 
 type MonsterSkill struct {

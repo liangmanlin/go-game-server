@@ -7,8 +7,8 @@ import (
 	"sync"
 )
 
-const DELTA_ERROR float32 = 64
-const DIST_FAIL float32 = 25
+const DELTA_ERROR = 64
+const DIST_FAIL = 25
 
 var _movePool = sync.Pool{
 	New: func() interface{} {

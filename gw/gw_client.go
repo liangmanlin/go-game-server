@@ -5,42 +5,41 @@ import (
 	"github.com/liangmanlin/gootp/gate"
 	"github.com/liangmanlin/gootp/gate/pb"
 	"github.com/liangmanlin/gootp/kernel"
-	"unsafe"
 )
 
 var TcpClientActor = &kernel.Actor{
-	Init: func(ctx *kernel.Context, pid *kernel.Pid, args ...interface{}) unsafe.Pointer {
+	Init: func(ctx *kernel.Context, pid *kernel.Pid, args ...interface{}) interface{} {
 		t := global.TcpClientState{}
 		t.Coder = args[0].(*pb.Coder)
-		t.Conn = args[1].(*gate.Conn)
+		t.Conn = args[1].(gate.Conn)
 		kernel.ErrorLog("connect")
-		return unsafe.Pointer(&t)
+		return &t
 	},
 	HandleCast: func(context *kernel.Context, msg interface{}) {
-		t := (*global.TcpClientState)(context.State)
+		t := context.State.(*global.TcpClientState)
 		switch m := msg.(type) {
 		case bool:
 			doLogin(t, context)
 		case []byte:
-			sendBuf(t,m)
+			sendBuf(t, m)
 		case *gate.TcpError:
 			context.Exit("normal")
 		case int:
 			context.Exit("normal")
 		case *global.TcpReConnectGW:
-			doReConnect(t,context,m)
+			doReConnect(t, context, m)
 		case gate.Pack:
 			switch proto := m.Proto.(type) {
 			case *global.LoginTosLogin:
-				doLoginLogin(t,context,proto)
+				doLoginLogin(t, context, proto)
 			case *global.LoginTosSelect:
-				doLoginSelect(t,context,proto)
+				doLoginSelect(t, context, proto)
 			case *global.LoginTosCreateRole:
-				doLoginCreate(t,context,proto)
+				doLoginCreate(t, context, proto)
 			default:
 				// 只有极少数情况会走到这里
 				if t.Player != nil {
-					context.Cast(t.Player,m)
+					context.Cast(t.Player, m)
 				}
 			}
 		default:
@@ -51,7 +50,7 @@ var TcpClientActor = &kernel.Actor{
 		return nil
 	},
 	Terminate: func(context *kernel.Context, reason *kernel.Terminate) {
-		t := (*global.TcpClientState)(context.State)
+		t := context.State.(*global.TcpClientState)
 		if t.Conn != nil {
 			t.Conn.Close()
 		}
@@ -64,7 +63,7 @@ var TcpClientActor = &kernel.Actor{
 
 func doLogin(t *global.TcpClientState, context *kernel.Context) {
 	t.Conn.SetHead(2)
-	err, buf := t.Conn.Recv(0, 5)
+	buf, err := t.Conn.Recv(0, 50000)
 	if err != nil {
 		kernel.ErrorLog("handshake error %s", err.Error())
 		context.Exit(kernel.ExitReasonNormal)
@@ -81,16 +80,16 @@ func doLogin(t *global.TcpClientState, context *kernel.Context) {
 			return
 		}
 		// 异步接收
-		t.Conn.StartReaderDecode(context.Self(),pb.GetCoder(1).Decode)
-	}else{
+		t.Conn.StartReader(context.Self())
+	} else {
 		pid := TokenToPid(pt.Token)
 		if pid != nil {
 			// 重连，转移到目标进程
-			context.Cast(pid,&global.TcpReConnectGW{Conn: t.Conn,RecID: pt.RecID,Token: pt.Token})
+			context.Cast(pid, &global.TcpReConnectGW{Conn: t.Conn, RecID: pt.RecID, Token: pt.Token})
 			rs := &global.LoginTocConnect{Succ: true, IsReconnect: true, Token: pt.Token}
 			_ = t.Conn.SendBufHead(t.Coder.Encode(rs, 2))
 			t.Conn = nil
-		}else{
+		} else {
 			rs := &global.LoginTocConnect{Succ: false, IsReconnect: true, Token: ""}
 			_ = t.Conn.SendBufHead(t.Coder.Encode(rs, 2))
 		}
@@ -98,14 +97,14 @@ func doLogin(t *global.TcpClientState, context *kernel.Context) {
 	}
 }
 
-func SendPack(state *global.TcpClientState,pack interface{})  {
-	buf := state.Coder.Encode(pack,2)
-	sendBuf(state,buf)
+func SendPack(state *global.TcpClientState, pack interface{}) {
+	buf := state.Coder.Encode(pack, 2)
+	sendBuf(state, buf)
 }
 
-func sendBuf(state *global.TcpClientState,buf []byte)  {
+func sendBuf(state *global.TcpClientState, buf []byte) {
 	state.SendID++
-	state.Cache[state.SendID % CacheSize] = buf
+	state.Cache[state.SendID%global.CacheSize] = buf
 	if state.Conn != nil {
 		if state.Conn.SendBufHead(buf) != nil {
 			state.Conn.Close()

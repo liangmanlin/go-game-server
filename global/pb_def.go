@@ -192,6 +192,7 @@ type PRoleAttr struct {
 	Gold    int64
 }
 
+
 type PRoleBase struct {
 	RoleID   int64
 	Name     string

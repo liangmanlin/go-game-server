@@ -42,39 +42,34 @@ type SkillShape struct {
 
 //BossWorld-start
 type DefBossWorld struct {
-	Type_id      int32   // bossID
-	Map_id       int32   // 地图id
-	Dec_lv       int32   // 等级差限制
-	Refresh_time int32   // 刷新时间
-	X            int32   // x
-	Y            int32   // y
-	Tire         int32   // 消耗体力
-	Sp_drop      []int32 // 第一层的boss特殊掉落
+	Type_id int32 // bossID
+	Map_id int32 // 地图id
+	Dec_lv int32 // 等级差限制
+	Refresh_time int32 // 刷新时间
+	X int32 // x
+	Y int32 // y
+	Tire int32 // 消耗体力
+	Sp_drop []int32 // 第一层的boss特殊掉落
 }
-type bossWorldConfig struct {
-	m   map[int32]int
+type bossWorldConfig struct{
+	m map[int32]int
 	arr []DefBossWorld
 }
-
 var BossWorld = &bossWorldConfig{}
-
-func (B bossWorldConfig) Get(key int32) *DefBossWorld {
+func (B *bossWorldConfig)Get(key int32)*DefBossWorld{
 	return &B.arr[B.m[key]]
 }
-func (B bossWorldConfig) load(path string) {
-	c := &bossWorldConfig{m: make(map[int32]int)}
-	if err := json.Unmarshal(readFile("BossWorld", path), &c.arr); err != nil {
-		panic(err)
-	}
-	for i := 0; i < len(c.arr); i++ {
+func (B *bossWorldConfig)load(path string)  {
+	c := &bossWorldConfig{m:make(map[int32]int)}
+	if err:= json.Unmarshal(readFile("BossWorld",path), &c.arr);err != nil{panic(err)}
+	for i:=0;i<len(c.arr);i++{
 		c.m[c.arr[i].Type_id] = i
 	}
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&BossWorld)), *(*unsafe.Pointer)(unsafe.Pointer(&c)))
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&BossWorld)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (B bossWorldConfig) All() []DefBossWorld {
+func (B *bossWorldConfig)All()[]DefBossWorld {
 	return B.arr
 }
-
 //BossWorld-end
 //Goods-start
 type DefGoods struct {
@@ -88,10 +83,10 @@ type goodsConfig struct{
 	arr []DefGoods
 }
 var Goods = &goodsConfig{}
-func (G goodsConfig)Get(key int32)*DefGoods{
+func (G *goodsConfig)Get(key int32)*DefGoods{
 	return &G.arr[G.m[key]]
 }
-func (G goodsConfig)load(path string)  {
+func (G *goodsConfig)load(path string)  {
 	c := &goodsConfig{m:make(map[int32]int)}
 	if err:= json.Unmarshal(readFile("Goods",path), &c.arr);err != nil{panic(err)}
 	for i:=0;i<len(c.arr);i++{
@@ -99,153 +94,138 @@ func (G goodsConfig)load(path string)  {
 	}
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Goods)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (G goodsConfig)All()[]DefGoods {
+func (G *goodsConfig)All()[]DefGoods {
 	return G.arr
 }
 //Goods-end
 //Monster-start
 type DefMonster struct {
-	Id             int32   // 地图ID+XXX
-	Name           string  // 怪物名字
-	Type           int32   // 类型1小怪，2个人boss，3世界boss，4通用boss，6召唤boss
-	Level          int32   // 等级
-	Behavior       int32   // 行为ID：对应monster_behavior中的ID。主动怪是1XXXX，被动怪是2XXXX
-	NotReduceHP    int32   // 0：扣血 1：不扣血 2：载具类型，扣血，但是不会增加仇恨
-	AttackSpeed    int32   // 攻击间隔
-	PropID         int32   // 属性id
-	GuardRadius    int32   // 警戒半径
-	AttackRadius   int32   // 攻击半径
-	ActivityRadius int32   // 活动半径
-	Skills         []int32 // 技能（技能ID列表）：如果是延迟类的，配置为{ID,延迟时间}， 时间为毫秒
-	RefreshTime    int32   // 刷新时间：0不再刷新，单位是毫秒
-	Drops          []int32 // 掉落方案
-	Exp            int32   // 经验基数
-	Gold           int32   // 金币基数：不加就配0
-	Radius         int32   // 模型半径(单位是一个格子，只能整数小怪都配0）
-	EventList      []int32 // 事件ID列表
-	FightPower     int32   // 战力
+	Id int32 // 地图ID+XXX
+	Name string // 怪物名字
+	Type int32 // 类型1小怪，2个人boss，3世界boss，4通用boss，6召唤boss
+	Level int32 // 等级
+	Behavior int32 // 行为ID：对应monster_behavior中的ID。主动怪是1XXXX，被动怪是2XXXX
+	NotReduceHP int32 // 0：扣血 1：不扣血 2：载具类型，扣血，但是不会增加仇恨
+	AttackSpeed int32 // 攻击间隔
+	PropID int32 // 属性id
+	GuardRadius int32 // 警戒半径
+	AttackRadius int32 // 攻击半径
+	ActivityRadius int32 // 活动半径
+	Skills []int32 // 技能（技能ID列表）：如果是延迟类的，配置为{ID,延迟时间}， 时间为毫秒
+	RefreshTime int32 // 刷新时间：0不再刷新，单位是毫秒
+	Drops []int32 // 掉落方案
+	Exp int32 // 经验基数
+	Gold int32 // 金币基数：不加就配0
+	Radius int32 // 模型半径(单位是一个格子，只能整数小怪都配0）
+	EventList []int32 // 事件ID列表
+	FightPower int32 // 战力
 }
-type monsterConfig struct {
-	m   map[int32]int
+type monsterConfig struct{
+	m map[int32]int
 	arr []DefMonster
 }
-
 var Monster = &monsterConfig{}
-
-func (M monsterConfig) Get(key int32) *DefMonster {
+func (M *monsterConfig)Get(key int32)*DefMonster{
 	return &M.arr[M.m[key]]
 }
-func (M monsterConfig) load(path string) {
-	c := &monsterConfig{m: make(map[int32]int)}
-	if err := json.Unmarshal(readFile("Monster", path), &c.arr); err != nil {
-		panic(err)
-	}
-	for i := 0; i < len(c.arr); i++ {
+func (M *monsterConfig)load(path string)  {
+	c := &monsterConfig{m:make(map[int32]int)}
+	if err:= json.Unmarshal(readFile("Monster",path), &c.arr);err != nil{panic(err)}
+	for i:=0;i<len(c.arr);i++{
 		c.m[c.arr[i].Id] = i
 	}
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Monster)), *(*unsafe.Pointer)(unsafe.Pointer(&c)))
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Monster)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (M monsterConfig) All() []DefMonster {
+func (M *monsterConfig)All()[]DefMonster {
 	return M.arr
 }
-
 //Monster-end
 //MonsterProp-start
 type DefMonsterProp struct {
-	ID              int32 // hero_type
-	MaxHP           int32 // 最大生命
-	PhyAttack       int32 // 攻击
-	ArmorBreak      int32 // 破甲
-	PhyDefence      int32 // 防御
-	Hit             int32 // 命中
-	Miss            int32 // 闪避
-	Crit            int32 // 暴击
-	Tenacity        int32 // 韧性
-	MoveSpeed       int32 // 移动速度
-	HpRecover       int32 // 生命回复
-	MaxHpRate       int32 // 增加万分值血量
-	AttackRate      int32 // 增加万分值攻击力
-	ArmorBreakRate  int32 // 破甲万分比
-	DefenceRate     int32 // 增加万分值防御值
-	HitAddRate      int32 // 命中万分比
-	MissAddRate     int32 // 闪避万分比
-	CritAddRate     int32 // 暴击万分比
+	ID int32 // hero_type
+	MaxHP int32 // 最大生命
+	PhyAttack int32 // 攻击
+	ArmorBreak int32 // 破甲
+	PhyDefence int32 // 防御
+	Hit int32 // 命中
+	Miss int32 // 闪避
+	Crit int32 // 暴击
+	Tenacity int32 // 韧性
+	MoveSpeed int32 // 移动速度
+	HpRecover int32 // 生命回复
+	MaxHpRate int32 // 增加万分值血量
+	AttackRate int32 // 增加万分值攻击力
+	ArmorBreakRate int32 // 破甲万分比
+	DefenceRate int32 // 增加万分值防御值
+	HitAddRate int32 // 命中万分比
+	MissAddRate int32 // 闪避万分比
+	CritAddRate int32 // 暴击万分比
 	TenacityAddRate int32 // 韧性万分比
-	DamageDeepen    int32 // 伤害加深
-	DamageDef       int32 // 伤害减免
-	HitRate         int32 // 命中率
-	MissRate        int32 // 闪避几率
-	CritRate        int32 // 暴击几率
-	CritDef         int32 // 暴击抵抗
-	CritValue       int32 // 暴伤加成
-	CritValueDef    int32 // 暴伤减免
-	ParryRate       int32 // 格挡几率
-	ParryOver       int32 // 格挡穿透
-	HuixinRate      int32 // 会心几率
-	HuixinDef       int32 // 会心抵抗
+	DamageDeepen int32 // 伤害加深
+	DamageDef int32 // 伤害减免
+	HitRate int32 // 命中率
+	MissRate int32 // 闪避几率
+	CritRate int32 // 暴击几率
+	CritDef int32 // 暴击抵抗
+	CritValue int32 // 暴伤加成
+	CritValueDef int32 // 暴伤减免
+	ParryRate int32 // 格挡几率
+	ParryOver int32 // 格挡穿透
+	HuixinRate int32 // 会心几率
+	HuixinDef int32 // 会心抵抗
 	PvpDamageDeepen int32 // pvp伤害增加万分比
-	PvpDamageDef    int32 // pvp伤害减免万分比
+	PvpDamageDef int32 // pvp伤害减免万分比
 	PveDamageDeepen int32 // pve伤害增加万分比
-	PveDamageDef    int32 // pve伤害减免万分比
-	TotalDef        int32 // 总体免伤万分比
+	PveDamageDef int32 // pve伤害减免万分比
+	TotalDef int32 // 总体免伤万分比
 }
-type monsterPropConfig struct {
-	m   map[int32]int
+type monsterPropConfig struct{
+	m map[int32]int
 	arr []DefMonsterProp
 }
-
 var MonsterProp = &monsterPropConfig{}
-
-func (M monsterPropConfig) Get(key int32) *DefMonsterProp {
+func (M *monsterPropConfig)Get(key int32)*DefMonsterProp{
 	return &M.arr[M.m[key]]
 }
-func (M monsterPropConfig) load(path string) {
-	c := &monsterPropConfig{m: make(map[int32]int)}
-	if err := json.Unmarshal(readFile("MonsterProp", path), &c.arr); err != nil {
-		panic(err)
-	}
-	for i := 0; i < len(c.arr); i++ {
+func (M *monsterPropConfig)load(path string)  {
+	c := &monsterPropConfig{m:make(map[int32]int)}
+	if err:= json.Unmarshal(readFile("MonsterProp",path), &c.arr);err != nil{panic(err)}
+	for i:=0;i<len(c.arr);i++{
 		c.m[c.arr[i].ID] = i
 	}
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&MonsterProp)), *(*unsafe.Pointer)(unsafe.Pointer(&c)))
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&MonsterProp)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (M monsterPropConfig) All() []DefMonsterProp {
+func (M *monsterPropConfig)All()[]DefMonsterProp {
 	return M.arr
 }
-
 //MonsterProp-end
 //MonsterBehavior-start
 type DefMonsterBehavior struct {
-	Id    int32   // 标识， 主动怪是1XXXX，被动怪是2XXXX
-	Type  int32   // 1:标志为需要进入战斗的行为 2：条件节点，判断通过后，会执行child 3：直接插入到doing中 4: 并列类型，会顺序执行逻辑，不能嵌套，一般只能出现在根节点
-	Func  string  // 执行的函数实体
-	Arg   []int32 // 参数，具体咨询技术
+	Id int32 // 标识， 主动怪是1XXXX，被动怪是2XXXX
+	Type int32 // 1:标志为需要进入战斗的行为 2：条件节点，判断通过后，会执行child 3：直接插入到doing中 4: 并列类型，会顺序执行逻辑，不能嵌套，一般只能出现在根节点
+	Func string // 执行的函数实体
+	Arg []int32 // 参数，具体咨询技术
 	Child []int32 // 孩子节点，只有condition类型才会执行
 }
-type monsterBehaviorConfig struct {
-	m   map[int32]int
+type monsterBehaviorConfig struct{
+	m map[int32]int
 	arr []DefMonsterBehavior
 }
-
 var MonsterBehavior = &monsterBehaviorConfig{}
-
-func (M monsterBehaviorConfig) Get(key int32) *DefMonsterBehavior {
+func (M *monsterBehaviorConfig)Get(key int32)*DefMonsterBehavior{
 	return &M.arr[M.m[key]]
 }
-func (M monsterBehaviorConfig) load(path string) {
-	c := &monsterBehaviorConfig{m: make(map[int32]int)}
-	if err := json.Unmarshal(readFile("MonsterBehavior", path), &c.arr); err != nil {
-		panic(err)
-	}
-	for i := 0; i < len(c.arr); i++ {
+func (M *monsterBehaviorConfig)load(path string)  {
+	c := &monsterBehaviorConfig{m:make(map[int32]int)}
+	if err:= json.Unmarshal(readFile("MonsterBehavior",path), &c.arr);err != nil{panic(err)}
+	for i:=0;i<len(c.arr);i++{
 		c.m[c.arr[i].Id] = i
 	}
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&MonsterBehavior)), *(*unsafe.Pointer)(unsafe.Pointer(&c)))
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&MonsterBehavior)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (M monsterBehaviorConfig) All() []DefMonsterBehavior {
+func (M *monsterBehaviorConfig)All()[]DefMonsterBehavior {
 	return M.arr
 }
-
 //MonsterBehavior-end
 //Skill-start
 type DefSkill struct {
@@ -279,10 +259,10 @@ type skillConfig struct{
 	arr []DefSkill
 }
 var Skill = &skillConfig{}
-func (S skillConfig)Get(key int32)*DefSkill{
+func (S *skillConfig)Get(key int32)*DefSkill{
 	return &S.arr[S.m[key]]
 }
-func (S skillConfig)load(path string)  {
+func (S *skillConfig)load(path string)  {
 	c := &skillConfig{m:make(map[int32]int)}
 	if err:= json.Unmarshal(readFile("Skill",path), &c.arr);err != nil{panic(err)}
 	for i:=0;i<len(c.arr);i++{
@@ -290,41 +270,36 @@ func (S skillConfig)load(path string)  {
 	}
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Skill)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (S skillConfig)All()[]DefSkill {
+func (S *skillConfig)All()[]DefSkill {
 	return S.arr
 }
 //Skill-end
 //SkillEffect-start
 type DefSkillEffect struct {
-	Id   int32   // id
-	Type int32   // 分类，1：回调函数，2：伤害函数
-	Func string  // 执行的函数实体
-	Arg  []int32 // 参数，具体咨询技术
+	Id int32 // id
+	Type int32 // 分类，1：回调函数，2：伤害函数
+	Func string // 执行的函数实体
+	Arg []int32 // 参数，具体咨询技术
 }
-type skillEffectConfig struct {
-	m   map[int32]int
+type skillEffectConfig struct{
+	m map[int32]int
 	arr []DefSkillEffect
 }
-
 var SkillEffect = &skillEffectConfig{}
-
-func (S skillEffectConfig) Get(key int32) *DefSkillEffect {
+func (S *skillEffectConfig)Get(key int32)*DefSkillEffect{
 	return &S.arr[S.m[key]]
 }
-func (S skillEffectConfig) load(path string) {
-	c := &skillEffectConfig{m: make(map[int32]int)}
-	if err := json.Unmarshal(readFile("SkillEffect", path), &c.arr); err != nil {
-		panic(err)
-	}
-	for i := 0; i < len(c.arr); i++ {
+func (S *skillEffectConfig)load(path string)  {
+	c := &skillEffectConfig{m:make(map[int32]int)}
+	if err:= json.Unmarshal(readFile("SkillEffect",path), &c.arr);err != nil{panic(err)}
+	for i:=0;i<len(c.arr);i++{
 		c.m[c.arr[i].Id] = i
 	}
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&SkillEffect)), *(*unsafe.Pointer)(unsafe.Pointer(&c)))
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&SkillEffect)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (S skillEffectConfig) All() []DefSkillEffect {
+func (S *skillEffectConfig)All()[]DefSkillEffect {
 	return S.arr
 }
-
 //SkillEffect-end
 //Buffs-start
 type DefBuffs struct {
@@ -353,10 +328,10 @@ type buffsConfig struct{
 	arr []DefBuffs
 }
 var Buffs = &buffsConfig{}
-func (B buffsConfig)Get(key int32)*DefBuffs{
+func (B *buffsConfig)Get(key int32)*DefBuffs{
 	return &B.arr[B.m[key]]
 }
-func (B buffsConfig)load(path string)  {
+func (B *buffsConfig)load(path string)  {
 	c := &buffsConfig{m:make(map[int32]int)}
 	if err:= json.Unmarshal(readFile("Buffs",path), &c.arr);err != nil{panic(err)}
 	for i:=0;i<len(c.arr);i++{
@@ -364,7 +339,7 @@ func (B buffsConfig)load(path string)  {
 	}
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Buffs)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (B buffsConfig)All()[]DefBuffs {
+func (B *buffsConfig)All()[]DefBuffs {
 	return B.arr
 }
 //Buffs-end
@@ -383,10 +358,10 @@ type mapsConfig struct{
 	arr []DefMaps
 }
 var Maps = &mapsConfig{}
-func (M mapsConfig)Get(key int32)*DefMaps{
+func (M *mapsConfig)Get(key int32)*DefMaps{
 	return &M.arr[M.m[key]]
 }
-func (M mapsConfig)load(path string)  {
+func (M *mapsConfig)load(path string)  {
 	c := &mapsConfig{m:make(map[int32]int)}
 	if err:= json.Unmarshal(readFile("Maps",path), &c.arr);err != nil{panic(err)}
 	for i:=0;i<len(c.arr);i++{
@@ -394,7 +369,7 @@ func (M mapsConfig)load(path string)  {
 	}
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&Maps)),*(*unsafe.Pointer)(unsafe.Pointer(&c)))
 }
-func (M mapsConfig)All()[]DefMaps {
+func (M *mapsConfig)All()[]DefMaps {
 	return M.arr
 }
 //Maps-end

@@ -15,7 +15,7 @@ var _argPool = sync.Pool{
 		return &MonsterCreateArg{}
 	},
 }
-var CreateMonsterArg = func() *MonsterCreateArg {
+func CreateMonsterArg() *MonsterCreateArg {
 	arg := _argPool.Get().(*MonsterCreateArg)
 	arg.Dir = -1
 	arg.Level = 0
@@ -31,6 +31,10 @@ func MonsterLoop(state *MapState, now2 int64) {
 	if dm.StopMonster == 0 || dm.StopMonster > now2 {
 		dm.IsMonsterLoop = true
 		for _, mState := range state.Monsters {
+			// 先更新buff
+			if mapMonster := state.GetMapInfoMonster(mState.ID);mapMonster.IsAlive() {
+				BuffLoopMapInfo(state, mapMonster, now2)
+			}
 			monsterUpdate(state, mState, now2)
 		}
 		dm.IsMonsterLoop = false
@@ -67,6 +71,12 @@ func MonsterUpdateSecond(state *MapState, now2 int64) {
 			}
 			delete(dm.AroundDest, ak)
 		}
+	}
+	roleNum := len(state.Roles)
+	if roleNum > 0 {
+		dm.StopMonster = 0
+	}else if roleNum == 0 && dm.StopMonster == 0 {
+		dm.StopMonster = now2+60*1000
 	}
 }
 
@@ -185,7 +195,7 @@ func monsterUpdate(state *MapState, mState *MState, now2 int64) {
 	}
 }
 
-var MonsterUpdate = func(state *MapState, mState *MState, now2 int64) {
+func MonsterUpdate(state *MapState, mState *MState, now2 int64) {
 	if mState.State == ACTOR_STATE_DEAD {
 		cfg := config.Monster.Get(mState.TypeID)
 		if cfg.RefreshTime > 0 {
@@ -228,6 +238,9 @@ func MonsterDelete(state *MapState, mState *MState) {
 var MonsterReduceHP = func(state *MapState, srcActor, destActor *MapActor, destMI *global.PMapMonster, damage int32) {
 	mState := state.Monsters[destMI.MonsterID]
 	AddEnemy(state, mState, srcActor, damage)
+	if mState.HPChange != nil {
+		(*mState.HPChange)(state,mState,srcActor,damage)
+	}
 	if destMI.HP > damage {
 		destMI.HP -= damage
 	} else {

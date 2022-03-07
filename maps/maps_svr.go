@@ -1,10 +1,8 @@
 package maps
 
 import (
-	"game/global"
 	"game/lib"
 	"github.com/liangmanlin/gootp/kernel"
-	"unsafe"
 )
 
 func StartMap(mapID int32, mapName string, mod *MapMod,args...interface{}) {
@@ -21,11 +19,11 @@ func StartCopy(mapID int32, mapName string, mod *MapMod,args...interface{})  {
 }
 
 var SvrActor = &kernel.Actor{
-	Init: func(ctx *kernel.Context, pid *kernel.Pid, args ...interface{}) unsafe.Pointer {
+	Init: func(ctx *kernel.Context, pid *kernel.Pid, args ...interface{}) interface{} {
 		mapID := args[0].(int32)
 		mapName := args[1].(string)
 		mod := args[2].(*MapMod)
-		state := NewMapState(mapID,mapName,mod)
+		state := NewMapState(mapID,mapName,mod,ctx)
 		if len(args) > 3 {
 			mod.Init(state,ctx, mapID, args[3:]...)
 		}else{
@@ -33,13 +31,13 @@ var SvrActor = &kernel.Actor{
 		}
 		lib.RegisterMap(mapName,pid)
 		// 启动定轮训
-		kernel.SendAfter(kernel.TimerTypeForever,pid,100,global.Loop{})
-		return unsafe.Pointer(state)
+		kernel.SendAfterForever(pid,100,kernel.Loop{})
+		return state
 	},
 	HandleCast: func(ctx *kernel.Context, msg interface{}) {
 		state := State(ctx)
 		switch msg.(type) {
-		case global.Loop:
+		case kernel.Loop:
 			mapLoop(state,ctx)
 		}
 	},

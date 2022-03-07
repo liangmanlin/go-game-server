@@ -27,7 +27,7 @@ func Start(encoder *pb.Coder, mapConfigPath string) {
 	}
 }
 
-func NewMapState(mapID int32, name string, mod *MapMod) *MapState {
+func NewMapState(mapID int32, name string, mod *MapMod,ctx *kernel.Context) *MapState {
 	state := MapState{Config: GetMapConfig(mapID), Mod: mod, Name: name,
 		MapRoles:    make(map[int64]*global.PMapRole),
 		MapMonsters: make(map[int64]*global.PMapMonster),
@@ -48,11 +48,12 @@ func NewMapState(mapID int32, name string, mod *MapMod) *MapState {
 	for i := 1; i < len(state.AreaMap); i++ {
 		state.AreaMap[i] = make(AreaMap, 5)
 	}
+	state.Context = ctx
 	return &state
 }
 
 func State(ctx *kernel.Context) *MapState {
-	return (*MapState)(ctx.State)
+	return ctx.State.(*MapState)
 }
 
 func (m *MapState) EnterActor(area Area, actorType int8, actorID int64) {

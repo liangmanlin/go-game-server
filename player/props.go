@@ -4,20 +4,33 @@ import (
 	"game/config"
 	"game/global"
 	"game/lib"
-	"github.com/liangmanlin/gootp/db"
-	"github.com/liangmanlin/gootp/kernel"
 )
 
 const propName = "prop"
 
-var PropLoad = func(ctx *kernel.Context, player *global.Player) {
-	rp := db.SyncSelectRow(ctx, global.TABLE_ROLE_PROP, player.RoleID, player.RoleID)
+var PropLoad = func(player *global.Player) {
+	rp := lib.GameDB.SyncSelectRow(player.Context.Call, global.TABLE_ROLE_PROP, player.RoleID, player.RoleID)
 	player.Prop = rp.(*global.RoleProp).Prop
 }
 
-var PropPersistent = func(ctx *kernel.Context, player *global.Player) {
+var PropPersistent = func(player *global.Player) {
 	p := *player.Prop
-	db.SyncUpdate(global.TABLE_ROLE_PROP, player.RoleID, &global.RoleProp{RoleID: player.RoleID, Prop: &p})
+	lib.GameDB.SyncUpdate(global.TABLE_ROLE_PROP, player.RoleID, &global.RoleProp{RoleID: player.RoleID, Prop: &p})
+}
+
+// 登录之后，从新计算一次属性
+var InitProps = func(player *global.Player) {
+	pd := propData(player)
+	pl := pd.CalcProps(lib.AllKeys())
+	prop := ToProp(player.Prop,pl)
+	player.Prop = prop
+}
+
+func ToProp(prop *global.PProp,pl []*global.PKV) *global.PProp {
+	for _,v := range pl {
+		lib.SetPropValue(prop,v.Key,v.Value)
+	}
+	return prop
 }
 
 // 添加属性

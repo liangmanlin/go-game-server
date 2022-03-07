@@ -15,9 +15,9 @@ func (m *MapState)BroadCastXY(x,y float32,proto interface{})  {
 
 func (m *MapState)BroadCastAreas(areas []Area, proto interface{}) {
 	bin := Encoder.Encode(proto, 2)
-	rm := m.AreaMap[global.ACTOR_ROLE]
+	roleAreaMap := m.AreaMap[global.ACTOR_ROLE]
 	for i := range areas {
-		l := rm.AreaActorIDs(areas[i])
+		l := roleAreaMap.AreaActorIDs(areas[i])
 		for _, roleID := range l {
 			if r, ok := m.Roles[roleID]; ok {
 				kernel.Cast(r.TcpPid, bin)

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"game/tool/exporter/excel"
-	"game/tool/exporter/toGo"
 	"flag"
 	"fmt"
+	"game/tool/exporter/excel"
+	"game/tool/exporter/toGo"
 	"os"
 )
 

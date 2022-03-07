@@ -12,8 +12,8 @@ import (
 */
 
 var _mapInfoPool = sync.Pool{
-	New: func()interface {}{
-		return make([]MapInfo,0,5)
+	New: func() interface{} {
+		return make([]MapInfo, 0, 5)
 	},
 }
 
@@ -168,7 +168,8 @@ func AoiUpdatePos(state *MapState, oldX, oldY float32, newPos *global.PPos, mapI
 			roles := GetAreaRoles(state, enterAreas)
 			monsters := GetAreaMonsters(state, enterAreas)
 			LeaveMonsters := GetAreasActorIDList(state, leaveAreas, global.ACTOR_MONSTER)
-			proto := &global.MapTocEnterArea{RolesShow: roles,
+			proto := &global.MapTocEnterArea{
+				RolesShow:    roles,
 				MonstersShow: monsters,
 				RolesDel:     LeaveRoles,
 				MonstersDel:  LeaveMonsters,
@@ -267,14 +268,14 @@ func GetAreaMonsters(state *MapState, areas []Area) []*global.PMapMonster {
 }
 
 // 返回值最好不要进行修改，并且使用完归还pool里面
-func AreasActorFold(state *MapState, actorType int8, areas []Area,srcInfo MapInfo, f AreaFoldFunc, args ...unsafe.Pointer) []MapInfo {
+func AreasActorFold(state *MapState, actorType int8, areas []Area, srcInfo MapInfo, f AreaFoldFunc, args ...unsafe.Pointer) []MapInfo {
 	rs := MakeMapInfoSlice()
 	pm := state.AreaMap[actorType]
 	for i := range areas {
 		if l, ok := pm[areas[i]]; ok {
 			for _, actorID := range *l {
 				if mapInfo := state.GetMapInfo(actorType, actorID); mapInfo != nil {
-					if f(state,srcInfo,mapInfo,args...) {
+					if f(state, srcInfo, mapInfo, args...) {
 						rs = append(rs, mapInfo)
 					}
 				}
@@ -289,6 +290,9 @@ func MakeMapInfoSlice() []MapInfo {
 	return s[0:0]
 }
 
-func ReleaseMapInfoSlice(s []MapInfo)  {
+func ReleaseMapInfoSlice(s []MapInfo) {
+	for i := 0; i < cap(s); i++ {
+		s[i] = nil // gc
+	}
 	_mapInfoPool.Put(s)
 }

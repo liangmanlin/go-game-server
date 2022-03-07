@@ -31,7 +31,7 @@ SOURCES := $(filter-out $(NOTMain) $(HotFix),$(SOURCES))
 PROTO_TOOL := $(SERVER_ROOT)/tool/bin/pbBuild
 PROTO_SRC := $(wildcard $(SERVER_ROOT)/tool/pbBuild/*.go $(SERVER_ROOT)/tool/pbBuild/*/*.go)
 
-all: mk_dir $(PROTO_TOOL) $(SERVER_ROOT)/proto/pb_auto.go $(OUT_DIR)/main $(HotFixOut) $(GMPD)
+all: mk_dir $(PROTO_TOOL) $(SERVER_ROOT)/proto/pb_auto.go $(OUT_DIR)/main $(HotFixOut)
 
 $(PROTO_TOOL): $(PROTO_SRC)
 	go build -o $@ $(SERVER_ROOT)/tool/pbBuild/*.go
@@ -54,6 +54,5 @@ mk_dir:
 
 clean:
 	@(rm -rf $(OUT_DIR)/main)
-	@(rm -rf $(OUT_DIR)/gmpd/*)
 	@(rm -rf $(OUT_DIR)/hotfix/*)
 	@(echo ****clean****)

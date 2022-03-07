@@ -67,4 +67,3 @@ const (
 	PROP_KEY_LEVEL
 	PROP_KEY_BUFF
 )
-

@@ -6,12 +6,11 @@ import (
 	"game/lib"
 	"game/player"
 	"github.com/liangmanlin/gootp/db"
-	"github.com/liangmanlin/gootp/gate/pb"
 	"github.com/liangmanlin/gootp/kernel"
 )
 
 func doReConnect(state *global.TcpClientState, ctx *kernel.Context, m *global.TcpReConnectGW) {
-	if state.SendID-m.RecID > CacheSize {
+	if state.SendID-m.RecID > global.CacheSize {
 		rs := &global.LoginTocConnect{Succ: false, IsReconnect: true}
 		_ = state.Conn.SendBufHead(state.Coder.Encode(rs, 2))
 		return
@@ -23,20 +22,20 @@ func doReConnect(state *global.TcpClientState, ctx *kernel.Context, m *global.Tc
 	// 通知player
 	if state.Player != nil {
 		ctx.Cast(state.Player, global.TcpReConnect{})
-		m.Conn.StartReaderDecode(state.Player, pb.GetCoder(1).Decode)
+		m.Conn.StartReader(state.Player)
 	}
 }
 
 func doLoginLogin(state *global.TcpClientState, ctx *kernel.Context, m *global.LoginTosLogin) {
-	t := db.ModSelectRow(db.GameDB, global.TABLE_ACCOUNT, m.Account, m.AgentID, m.ServerID)
+	t := lib.GameDB.ModSelectRow(global.TABLE_ACCOUNT, m.Account, m.AgentID, m.ServerID)
 	var account *global.Account
 	if t == nil {
 		account = &global.Account{Account: m.Account, AgentID: m.AgentID, ServerID: m.ServerID}
-		db.ModInsert(db.GameDB, global.TABLE_ACCOUNT, account)
+		lib.GameDB.ModInsert(global.TABLE_ACCOUNT, account)
 	} else {
 		account = t.(*global.Account)
 	}
-	baseList := db.ModSelectAllWhere(db.GameDB, global.TABLE_ROLE_BASE,
+	baseList := lib.GameDB.ModSelectAllWhere(global.TABLE_ROLE_BASE,
 		fmt.Sprintf("Account = %s and AgentID = %d and ServerID = %d", db.Encode(m.Account), m.AgentID, m.ServerID))
 	var roles []*global.PRole
 	for i := range baseList {
@@ -66,10 +65,10 @@ func doLoginSelect(state *global.TcpClientState, ctx *kernel.Context, m *global.
 		return
 	}
 	var rl []int64
-	for i := range state.Roles{
-		rl = append(rl,state.Roles[i].RoleID)
+	for i := range state.Roles {
+		rl = append(rl, state.Roles[i].RoleID)
 	}
-	kickRoles(ctx,rl,state.RoleID)
+	kickRoles(ctx, rl, state.RoleID)
 	playerPid := player.Start(ctx.Self(), state.Conn, state.RoleID)
 	if playerPid != nil {
 		state.Roles = nil // gc
@@ -97,18 +96,18 @@ func doLoginCreate(state *global.TcpClientState, ctx *kernel.Context, m *global.
 			HeroType: m.HeroType,
 			Sex:      m.Sex,
 		})
-	if !ok{
+	if !ok {
 		r := &global.LoginTocCreateRole{Succ: false, Reason: lib.ErrToPMsg(rs)}
 		SendPack(state, r)
 		return
 	}
-	switch msg :=rs.(type) {
+	switch msg := rs.(type) {
 	case *global.PMsg:
 		r := &global.LoginTocCreateRole{Succ: false, Reason: msg}
 		SendPack(state, r)
 	case *global.CreateRoleResult:
 		state.RoleID = msg.RoleID
-		kickRoles(ctx,msg.Roles,msg.RoleID)
+		kickRoles(ctx, msg.Roles, msg.RoleID)
 		playerPid := player.Start(ctx.Self(), state.Conn, state.RoleID)
 		if playerPid != nil {
 			state.Roles = nil // gc
@@ -126,17 +125,17 @@ func syncPack(state *global.TcpClientState, id int64) {
 	id++
 	c := state.Conn
 	for id <= state.SendID {
-		pack := state.Cache[id%CacheSize]
+		pack := state.Cache[id%global.CacheSize]
 		_ = c.SendBufHead(pack)
 		id++
 	}
 }
 
-func kickRoles(ctx *kernel.Context,roles []int64,roleID int64)  {
-	for _,rid := range roles {
+func kickRoles(ctx *kernel.Context, roles []int64, roleID int64) {
+	for _, rid := range roles {
 		if rid != roleID {
-			if pid := lib.GetRolePid(rid);pid != nil{
-				ctx.Call(pid,global.Kick{})
+			if pid := lib.GetRolePid(rid); pid != nil {
+				ctx.Call(pid, global.Kick{})
 			}
 		}
 	}

@@ -3,15 +3,14 @@ package player
 import (
 	"game/global"
 	"game/lib"
-	"github.com/liangmanlin/gootp/db"
 	"github.com/liangmanlin/gootp/gutil"
 	"github.com/liangmanlin/gootp/kernel"
 )
 
 const bagName = "bag"
 
-var BagLoad = func(ctx *kernel.Context, player *global.Player) {
-	rl := db.SyncSelect(ctx, global.TABLE_BAG, player.RoleID, player.RoleID)
+var BagLoad = func(player *global.Player) {
+	rl := lib.GameDB.SyncSelect(player.Context.Call, global.TABLE_BAG, player.RoleID, player.RoleID)
 	m := make(map[int32]*global.PGoods)
 	var maxID int32
 	tm := make(map[int32][]int32)
@@ -26,16 +25,16 @@ var BagLoad = func(ctx *kernel.Context, player *global.Player) {
 	player.Bag = &global.BagData{MaxSize: 100, Goods: m, TypeIDMap: tm}
 }
 
-var BagPersistent = func(ctx *kernel.Context, player *global.Player) {
+var BagPersistent = func(player *global.Player) {
 	if len(player.Bag.Dirty) > 0 {
 		for id, v := range player.Bag.Dirty {
 			switch v.Type {
 			case global.DB_OP_ADD:
-				db.SyncInsert(global.TABLE_BAG, player.RoleID, toBag(player.Bag.Goods[id]))
+				lib.GameDB.SyncInsert(global.TABLE_BAG, player.RoleID, toBag(player.Bag.Goods[id]))
 			case global.DB_OP_UPDATE:
-				db.SyncUpdate(global.TABLE_BAG, player.RoleID, toBag(player.Bag.Goods[id]))
+				lib.GameDB.SyncUpdate(global.TABLE_BAG, player.RoleID, toBag(player.Bag.Goods[id]))
 			case global.DB_OP_DELETE:
-				db.SyncDelete(global.TABLE_BAG, player.RoleID, toBag(v.Goods))
+				lib.GameDB.SyncDelete(global.TABLE_BAG, player.RoleID, toBag(v.Goods))
 			}
 		}
 		player.Bag.Dirty = make(map[int32]global.GoodsDirty)

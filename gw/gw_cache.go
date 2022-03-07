@@ -5,8 +5,6 @@ import (
 	"sync"
 )
 
-var CacheSize int64= 300
-
 var tokenMap sync.Map
 
 func InsertToken(token string, pid *kernel.Pid) {

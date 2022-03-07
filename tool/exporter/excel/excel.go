@@ -1,8 +1,8 @@
 package excel
 
 import (
-	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"fmt"
+	"github.com/xuri/excelize/v2"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -15,7 +15,8 @@ func LoadFile(fileName string) *Excel {
 	if err != nil {
 		panic(fmt.Errorf("读取文件：%s 失败：%s", fileName, err.Error()))
 	}
-	sheetName := file.GetSheetName(1)
+	sheets := file.GetSheetList()
+	sheetName := sheets[0] // 第一个工作表默认
 	rows, err := file.GetRows(sheetName)
 	if err != nil {
 		panic(fmt.Errorf("读取文件：%s 失败：%s", fileName, err.Error()))
@@ -105,7 +106,7 @@ func getRule(h int, index int, file *excelize.File, sheetName string) Rule {
 	}
 	styleID, _ := file.GetCellStyle(sheetName, axis)
 	fillID := file.Styles.CellXfs.Xf[styleID].FillID
-	fgColor := file.Styles.Fills.Fill[fillID].PatternFill.FgColor
+	fgColor := file.Styles.Fills.Fill[*fillID].PatternFill.FgColor
 	return ruleMap[fgColor.Indexed]
 }
 
